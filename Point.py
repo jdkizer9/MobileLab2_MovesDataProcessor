@@ -9,6 +9,7 @@ class Point(object):
 		self.latitude = dictionary['lat']
 		self.longitude = dictionary['lon']
 
+	#returns meters
 	def distanceFromPoint(self, point):
 
 		lat1 = self.latitude
@@ -46,7 +47,8 @@ class Point(object):
 		# Remember to multiply arc by the radius of the earth
 		# in your favorite set of units to get length.
 		# MODIFIED TO return distance in miles
-		return arc*3960.0
+		#return arc*3960.0
+		return arc*3960.0*1609.34
 
 class TrackPoint(Point):
 	def __init__(self, dictionary):

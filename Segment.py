@@ -2,18 +2,13 @@
 
 from Activity import Activity
 from Place import Place
-from datetime import datetime
+from datetime import datetime, time
 from dateutil import parser
 
 class Segment(object):
 	def __init__(self, dictionary):
-		#print 'In Segment Constructor'
 		self.segmentType = dictionary['type']
-		#print self.segmentType
-		#print dictionary['startTime']
-		#self.startTime = datetime.strptime(dictionary['startTime'], '%Y%m%dT%H%M%S%Z')
 		self.startTime = parser.parse(dictionary['startTime'])
-		#self.endTime = datetime.strptime(dictionary['endTime'], '%Y%m%dT%H%M%S%Z')
 		self.endTime = parser.parse(dictionary['endTime'])
 
 		if 'activities' in dictionary:
@@ -29,15 +24,29 @@ class Segment(object):
 			pointList = pointList + listOfPoints
 		return pointList
 
+	def minutesForDay(self, day):
+		startTime = self.startTime
+		endTime = self.endTime
+
+		#the start time for this segment occurred before today
+		#set startTime to be the beginning of today
+		if startTime.date() < day:
+			startTime = datetime.combine(day, time(tzinfo=self.startTime.tzinfo))
+
+		if endTime.date() > day:
+			endTime = datetime.combine(day, time(hour=23, minute=59, second=59, tzinfo=self.endTime.tzinfo))
+
+		timeDelta = endTime - startTime
+		return timeDelta.total_seconds()/60.0
+
 class PlaceSegment(Segment):
 	"""docstring for PlaceSegment"""
 	def __init__(self, dictionary):
-		#print 'In Place Segment Constructor'
 		super(PlaceSegment, self).__init__(dictionary)
-		#print 'In Place Segment Constructor'
-		#print dictionary['place']
-		#print self.segmentType
 		self.place = Place(dictionary['place'])
+
+	def placeHasLogicalLocation(self, logicalLocation):
+		return self.place.logicalLocation == logicalLocation
 
 class MoveSegment(Segment):
 	"""docstring for MoveSegment"""
